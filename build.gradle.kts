@@ -3,6 +3,13 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 fun properties(key: String) = project.findProperty(key).toString()
 
+dependencies {
+    implementation("commons-lang:commons-lang:2.6")
+    implementation("com.github.javaparser:javaparser-symbol-solver-core:3.24.2")
+    implementation("org.projectlombok:lombok:1.18.22")
+    implementation("org.freemarker:freemarker:2.3.31")
+}
+
 plugins {
     // Java support
     id("java")
@@ -54,6 +61,7 @@ tasks {
         withType<JavaCompile> {
             sourceCompatibility = it
             targetCompatibility = it
+            options.encoding = "UTF-8"
         }
         withType<KotlinCompile> {
             kotlinOptions.jvmTarget = it
