@@ -19,8 +19,6 @@ import java.util.stream.Collectors;
 @Builder
 public class ControllerTestSchema {
 
-    private String packageName;
-
     @Builder.Default
     private Set<String> deps = new HashSet<>();
 
@@ -33,12 +31,6 @@ public class ControllerTestSchema {
     private String jsonName;
 
     private String baseUrl;
-
-    private String author;
-
-    private String operator;
-
-    private String merchantId;
 
     private Read read;
 
@@ -67,10 +59,6 @@ public class ControllerTestSchema {
                 .baseUrl(baseUrl)
                 .description(description)
                 .build();
-        schema.setPackageName("com.nhsoft.mars.chain.adapter.web");
-        schema.setAuthor("nhsoft.huajy");
-        schema.setOperator("ConstantsTest.OPERATOR_HUAJY");
-        schema.setMerchantId("ConstantsTest.HUAJY_MERCHANT_ID_1");
 
         List<Api> apiList = controllerSchema.getApiList();
         controllerSchema.getApiList().forEach(api -> {
