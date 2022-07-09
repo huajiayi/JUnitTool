@@ -46,7 +46,6 @@ public class Main {
         String baseDir = "src/main/java/com/github/huajiayi/junittool";
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
         File templateDir = new File(baseDir + "/template");
-        System.out.println(templateDir.getAbsolutePath());
         cfg.setDirectoryForTemplateLoading(templateDir);
         cfg.setDefaultEncoding("UTF-8");
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
@@ -62,5 +61,6 @@ public class Main {
         }
         Writer out = new FileWriter(testFile);
         temp.process(root, out);
+        System.out.println(testFile.getAbsolutePath());
     }
 }

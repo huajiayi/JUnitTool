@@ -30,7 +30,4 @@ public class Read {
 
         return read;
     }
-
-    ;
-
 }

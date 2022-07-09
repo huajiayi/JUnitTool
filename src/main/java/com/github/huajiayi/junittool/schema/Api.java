@@ -140,7 +140,7 @@ public class Api {
             type = type.substring(index + 1, type.length() - 1);
         }
 
-        String name = CommonUtil.toSmallCamel(type);
+        String name = StringUtils.uncapitalize(type);
         Param param = Param.build(type, name, depPackageMap);
         this.setResponse(param);
     }

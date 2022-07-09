@@ -6,6 +6,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import lombok.Builder;
 import lombok.Data;
+import org.apache.commons.lang.StringUtils;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -82,7 +83,7 @@ public class ControllerSchema {
     private void fillResourceName() {
         String name = this.getName();
         String nameWithController = name.replace("Controller", "");
-        String resourceName = CommonUtil.toSmallCamel(nameWithController);
+        String resourceName = StringUtils.uncapitalize(nameWithController);
         this.setResourceName(resourceName);
     }
 

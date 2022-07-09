@@ -26,6 +26,7 @@ import java.util.List;
 *
 * @author ${author}
 */
+@Transactional
 public class ${controller.name}Test extends BaseTest {
 
     private static final String BASE_URL = "${controller.baseUrl}";
@@ -65,7 +66,6 @@ public class ${controller.name}Test extends BaseTest {
     * @throws Exception 异常信息
     */
     @Test
-    @Transactional
     public void testSave() throws Exception {
         ${controller.save.requestBody.type} ${controller.resourceName}SaveVO = MockUtil.fromFile("${controller.jsonName}_save.json", ${controller.save.requestBody.type}.class);
         MockHttpServletResponse response = save(${merchantId}, ${controller.resourceName}SaveVO, MockMvcResultMatchers.status().isCreated());
@@ -86,7 +86,6 @@ public class ${controller.name}Test extends BaseTest {
     * @throws Exception 异常信息
     */
     @Test
-    @Transactional
     public void testUpdate() throws Exception {
         ${controller.save.requestBody.type} ${controller.resourceName}SaveVO = MockUtil.fromFile("${controller.jsonName}_save.json", ${controller.save.requestBody.type}.class);
         MockHttpServletResponse response = save(${merchantId}, ${controller.resourceName}SaveVO, MockMvcResultMatchers.status().isCreated());
@@ -115,7 +114,6 @@ public class ${controller.name}Test extends BaseTest {
     * @throws Exception 异常信息
     */
     @Test
-    @Transactional
     public void testDelete() throws Exception {
         ${controller.save.requestBody.type} ${controller.resourceName}SaveVO = MockUtil.fromFile("${controller.jsonName}_save.json", ${controller.save.requestBody.type}.class);
         MockHttpServletResponse response = save(${merchantId}, ${controller.resourceName}SaveVO, MockMvcResultMatchers.status().isCreated());
@@ -135,9 +133,6 @@ public class ${controller.name}Test extends BaseTest {
     * @throws Exception 异常
     */
     @Test
-    <#if api.method == 'put' || api.method == 'post'>
-    @Transactional
-    </#if>
     public void test${api.name?cap_first}() throws Exception {
     <#if api.pathVariableList?size gt 0>
         <#list api.pathVariableList as pathVariable>
@@ -153,19 +148,20 @@ public class ${controller.name}Test extends BaseTest {
 
     </#if>
         String url = BASE_URL + "${api.url}";
-        <#if api.requestBody?? && api.response.listIs?string('true', 'false') == 'true'>MockHttpServletResponse mockResponse = </#if>mockMvc.perform(MockMvcRequestBuilders.${api.method}(url)
+        <#if api.response?? && api.response.listIs?string('true', 'false') == 'true'>MockHttpServletResponse mockResponse = </#if>mockMvc.perform(MockMvcRequestBuilders.${api.method}(url)
                     .contentType(MediaType.APPLICATION_JSON)
                     .header(HeaderConstants.X_MARS_MERCHANT_ID, ${merchantId})
                     .header(HeaderConstants.X_MARS_ACCESS_TOKEN, ConstantsTest.X_MARS_ACCESS_TOKEN)
                     .header(HeaderConstants.X_MARS_MERCHANT_OPERATOR, ${operator})
     <#if api.requestParamList?size gt 0>
         <#list api.requestParamList as requestParam>
-                    .param("${requestParam.jsonName}", "")<#if !requestParam_has_next>)</#if>
+                    .param("${requestParam.jsonName}", "")
         </#list>
     </#if>
     <#if api.requestBody??>
-                    .content(gson.toJson(${api.requestBody.name})))
+                    .content(gson.toJson(${api.requestBody.name}))
     </#if>
+            )
     <#if api.method == 'post'>
             .andExpect(MockMvcResultMatchers.status().isCreated())
     <#else>
@@ -191,7 +187,7 @@ public class ${controller.name}Test extends BaseTest {
     </#list>
     * @return 返回对象
     */
-    private ${controller.read.returnParam.type} read(final BigInteger merchantId<#list controller.read.pathVariableList as pathVariable>,final ${pathVariable.type} ${pathVariable.name}</#list>) throws Exception {
+    private ${controller.read.returnParam.type} read(final BigInteger merchantId<#list controller.read.pathVariableList as pathVariable>, final ${pathVariable.type} ${pathVariable.name}</#list>) throws Exception {
         String url = BASE_URL + "${controller.read.url}";
         MockHttpServletResponse mockResponse = mockMvc.perform(MockMvcRequestBuilders.get(url)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -277,7 +273,7 @@ public class ${controller.name}Test extends BaseTest {
         .andReturn().getResponse();
         mockResponse.setCharacterEncoding("UTF-8");
 
-        return mockResponse
+        return mockResponse;
     }
 </#if>
 }

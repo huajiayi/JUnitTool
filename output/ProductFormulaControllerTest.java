@@ -1,4 +1,4 @@
-package com.nhsoft.mars.chain.adapter.web;
+package com.nhsoft.mars.stock.adapter.web;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.FieldNamingPolicy;
@@ -26,6 +26,7 @@ import java.util.List;
 *
 * @author nhsoft.huajy
 */
+@Transactional
 public class ProductFormulaControllerTest extends BaseTest {
 
     private static final String BASE_URL = "/admin/api/internal";
@@ -65,6 +66,8 @@ public class ProductFormulaControllerTest extends BaseTest {
         Assert.assertEquals(, productFormulaVORead.getFinishedCostPrice());
         Assert.assertEquals(, productFormulaVORead.getFinishedProductUnit());
         Assert.assertEquals(, productFormulaVORead.getMaterialList());
+        Assert.assertEquals(, productFormulaVORead.getTempFinishedIs());
+        Assert.assertEquals(, productFormulaVORead.getFinishedSingleVariantIs());
     }
 
     /**
@@ -74,7 +77,6 @@ public class ProductFormulaControllerTest extends BaseTest {
     * @throws Exception 异常信息
     */
     @Test
-    @Transactional
     public void testSave() throws Exception {
         ProductFormulaSaveVO productFormulaSaveVO = MockUtil.fromFile("product_formula_save.json", ProductFormulaSaveVO.class);
         MockHttpServletResponse response = save(ConstantsTest.HUAJY_MERCHANT_ID_1, productFormulaSaveVO, MockMvcResultMatchers.status().isCreated());
@@ -96,6 +98,8 @@ public class ProductFormulaControllerTest extends BaseTest {
         Assert.assertEquals(productFormulaSaveVO.getFinishedCostPrice(), productFormulaVORead.getFinishedCostPrice());
         Assert.assertEquals(productFormulaSaveVO.getFinishedProductUnit(), productFormulaVORead.getFinishedProductUnit());
         Assert.assertEquals(productFormulaSaveVO.getMaterialList(), productFormulaVORead.getMaterialList());
+        Assert.assertEquals(productFormulaSaveVO.getTempFinishedIs(), productFormulaVORead.getTempFinishedIs());
+        Assert.assertEquals(productFormulaSaveVO.getFinishedSingleVariantIs(), productFormulaVORead.getFinishedSingleVariantIs());
     }
 
     /**
@@ -105,7 +109,6 @@ public class ProductFormulaControllerTest extends BaseTest {
     * @throws Exception 异常信息
     */
     @Test
-    @Transactional
     public void testUpdate() throws Exception {
         ProductFormulaSaveVO productFormulaSaveVO = MockUtil.fromFile("product_formula_save.json", ProductFormulaSaveVO.class);
         MockHttpServletResponse response = save(ConstantsTest.HUAJY_MERCHANT_ID_1, productFormulaSaveVO, MockMvcResultMatchers.status().isCreated());
@@ -132,6 +135,8 @@ public class ProductFormulaControllerTest extends BaseTest {
         Assert.assertEquals(productFormulaUpdateVO.getFinishedCostPrice(), productFormulaVORead.getFinishedCostPrice());
         Assert.assertEquals(productFormulaUpdateVO.getFinishedProductUnit(), productFormulaVORead.getFinishedProductUnit());
         Assert.assertEquals(productFormulaUpdateVO.getMaterialList(), productFormulaVORead.getMaterialList());
+        Assert.assertEquals(productFormulaUpdateVO.getTempFinishedIs(), productFormulaVORead.getTempFinishedIs());
+        Assert.assertEquals(productFormulaUpdateVO.getFinishedSingleVariantIs(), productFormulaVORead.getFinishedSingleVariantIs());
     }
 
     /**
@@ -141,7 +146,6 @@ public class ProductFormulaControllerTest extends BaseTest {
     * @throws Exception 异常信息
     */
     @Test
-    @Transactional
     public void testDelete() throws Exception {
         ProductFormulaSaveVO productFormulaSaveVO = MockUtil.fromFile("product_formula_save.json", ProductFormulaSaveVO.class);
         MockHttpServletResponse response = save(ConstantsTest.HUAJY_MERCHANT_ID_1, productFormulaSaveVO, MockMvcResultMatchers.status().isCreated());
@@ -168,6 +172,7 @@ public class ProductFormulaControllerTest extends BaseTest {
                     .header(HeaderConstants.X_MARS_MERCHANT_ID, ConstantsTest.HUAJY_MERCHANT_ID_1)
                     .header(HeaderConstants.X_MARS_ACCESS_TOKEN, ConstantsTest.X_MARS_ACCESS_TOKEN)
                     .header(HeaderConstants.X_MARS_MERCHANT_OPERATOR, ConstantsTest.OPERATOR_HUAJY)
+            )
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andReturn().getResponse();
     }
@@ -187,6 +192,7 @@ public class ProductFormulaControllerTest extends BaseTest {
                     .header(HeaderConstants.X_MARS_MERCHANT_ID, ConstantsTest.HUAJY_MERCHANT_ID_1)
                     .header(HeaderConstants.X_MARS_ACCESS_TOKEN, ConstantsTest.X_MARS_ACCESS_TOKEN)
                     .header(HeaderConstants.X_MARS_MERCHANT_OPERATOR, ConstantsTest.OPERATOR_HUAJY)
+            )
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andReturn().getResponse();
     }
@@ -199,16 +205,18 @@ public class ProductFormulaControllerTest extends BaseTest {
     @Test
     public void testList() throws Exception {
         String url = BASE_URL + "/product_formulas.json";
-        mockMvc.perform(MockMvcRequestBuilders.get(url)
+        MockHttpServletResponse mockResponse = mockMvc.perform(MockMvcRequestBuilders.get(url)
                     .contentType(MediaType.APPLICATION_JSON)
                     .header(HeaderConstants.X_MARS_MERCHANT_ID, ConstantsTest.HUAJY_MERCHANT_ID_1)
                     .header(HeaderConstants.X_MARS_ACCESS_TOKEN, ConstantsTest.X_MARS_ACCESS_TOKEN)
                     .header(HeaderConstants.X_MARS_MERCHANT_OPERATOR, ConstantsTest.OPERATOR_HUAJY)
                     .param("product_query_name", "")
                     .param("category_id_list", "")
+                    .param("temp_finished_product_id_list", "")
                     .param("offset", "")
                     .param("limit", "")
-                    .param("sort_order", ""))
+                    .param("sort_order", "")
+            )
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andReturn().getResponse();
     Type type = new TypeToken<List<ProductFormulaVO>>() {}.getType();
@@ -224,12 +232,13 @@ public class ProductFormulaControllerTest extends BaseTest {
     @Test
     public void testListProductVariantId() throws Exception {
         String url = BASE_URL + "/product_formulas/list_product_variant_id.json";
-        mockMvc.perform(MockMvcRequestBuilders.get(url)
+        MockHttpServletResponse mockResponse = mockMvc.perform(MockMvcRequestBuilders.get(url)
                     .contentType(MediaType.APPLICATION_JSON)
                     .header(HeaderConstants.X_MARS_MERCHANT_ID, ConstantsTest.HUAJY_MERCHANT_ID_1)
                     .header(HeaderConstants.X_MARS_ACCESS_TOKEN, ConstantsTest.X_MARS_ACCESS_TOKEN)
                     .header(HeaderConstants.X_MARS_MERCHANT_OPERATOR, ConstantsTest.OPERATOR_HUAJY)
-                    .param("process_type", ""))
+                    .param("process_type", "")
+            )
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andReturn().getResponse();
     Type type = new TypeToken<List<BigInteger>>() {}.getType();
@@ -244,20 +253,131 @@ public class ProductFormulaControllerTest extends BaseTest {
     */
     @Test
     public void testListVariantPrice() throws Exception {
-        String url = BASE_URL + "/product_formulas/list_material_with_price.json.json";
-        mockMvc.perform(MockMvcRequestBuilders.get(url)
+        String url = BASE_URL + "/product_formulas/list_material_with_price.json";
+        MockHttpServletResponse mockResponse = mockMvc.perform(MockMvcRequestBuilders.get(url)
                     .contentType(MediaType.APPLICATION_JSON)
                     .header(HeaderConstants.X_MARS_MERCHANT_ID, ConstantsTest.HUAJY_MERCHANT_ID_1)
                     .header(HeaderConstants.X_MARS_ACCESS_TOKEN, ConstantsTest.X_MARS_ACCESS_TOKEN)
                     .header(HeaderConstants.X_MARS_MERCHANT_OPERATOR, ConstantsTest.OPERATOR_HUAJY)
                     .param("variant_id_list", "")
                     .param("storehouse_id", "")
-                    .param("location_id", ""))
+                    .param("location_id", "")
+            )
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andReturn().getResponse();
     Type type = new TypeToken<List<ProductFormulaVO>>() {}.getType();
     List<ProductFormulaVO> print = Printer.print(mockResponse, type);
         Assert.assertEquals(, print.size());
+    }
+
+    /**
+    * 测试根据规格id集合删除成品或者原料.
+    *
+    * @throws Exception 异常
+    */
+    @Test
+    public void testDeleteFinishedAndMaterialByVariantIdList() throws Exception {
+        String url = BASE_URL + "/product_formulas/delete_finished_and_material_by_variant_id_list.json";
+        mockMvc.perform(MockMvcRequestBuilders.delete(url)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header(HeaderConstants.X_MARS_MERCHANT_ID, ConstantsTest.HUAJY_MERCHANT_ID_1)
+                    .header(HeaderConstants.X_MARS_ACCESS_TOKEN, ConstantsTest.X_MARS_ACCESS_TOKEN)
+                    .header(HeaderConstants.X_MARS_MERCHANT_OPERATOR, ConstantsTest.OPERATOR_HUAJY)
+                    .param("variant_id_list", "")
+            )
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andReturn().getResponse();
+    }
+
+    /**
+    * 测试根据商品id集合删除成品或者原料.
+    *
+    * @throws Exception 异常
+    */
+    @Test
+    public void testDeleteFinishedAndMaterialByProductIdList() throws Exception {
+        String url = BASE_URL + "/product_formulas/delete_finished_and_material_by_product_id_list.json";
+        mockMvc.perform(MockMvcRequestBuilders.delete(url)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header(HeaderConstants.X_MARS_MERCHANT_ID, ConstantsTest.HUAJY_MERCHANT_ID_1)
+                    .header(HeaderConstants.X_MARS_ACCESS_TOKEN, ConstantsTest.X_MARS_ACCESS_TOKEN)
+                    .header(HeaderConstants.X_MARS_MERCHANT_OPERATOR, ConstantsTest.OPERATOR_HUAJY)
+                    .param("product_id_list", "")
+            )
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andReturn().getResponse();
+    }
+
+    /**
+    * 测试校验规格是否在配方.
+    *
+    * @throws Exception 异常
+    */
+    @Test
+    public void testCheckVariantInFormulas() throws Exception {
+        String url = BASE_URL + "/product_formulas/check_variant_in_formulas.json";
+        MockHttpServletResponse mockResponse = mockMvc.perform(MockMvcRequestBuilders.delete(url)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header(HeaderConstants.X_MARS_MERCHANT_ID, ConstantsTest.HUAJY_MERCHANT_ID_1)
+                    .header(HeaderConstants.X_MARS_ACCESS_TOKEN, ConstantsTest.X_MARS_ACCESS_TOKEN)
+                    .header(HeaderConstants.X_MARS_MERCHANT_OPERATOR, ConstantsTest.OPERATOR_HUAJY)
+                    .param("variant_id_list", "")
+            )
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andReturn().getResponse();
+    Type type = new TypeToken<List<BigInteger>>() {}.getType();
+    List<BigInteger> print = Printer.print(mockResponse, type);
+        Assert.assertEquals(, print.size());
+    }
+
+    /**
+    * 测试校验商品是否在配方.
+    *
+    * @throws Exception 异常
+    */
+    @Test
+    public void testCheckProductInFormulas() throws Exception {
+        String url = BASE_URL + "/product_formulas/check_product_in_formulas.json";
+        MockHttpServletResponse mockResponse = mockMvc.perform(MockMvcRequestBuilders.delete(url)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header(HeaderConstants.X_MARS_MERCHANT_ID, ConstantsTest.HUAJY_MERCHANT_ID_1)
+                    .header(HeaderConstants.X_MARS_ACCESS_TOKEN, ConstantsTest.X_MARS_ACCESS_TOKEN)
+                    .header(HeaderConstants.X_MARS_MERCHANT_OPERATOR, ConstantsTest.OPERATOR_HUAJY)
+                    .param("product_id_list", "")
+            )
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andReturn().getResponse();
+    Type type = new TypeToken<List<BigInteger>>() {}.getType();
+    List<BigInteger> print = Printer.print(mockResponse, type);
+        Assert.assertEquals(, print.size());
+    }
+
+    /**
+    * 测试导出商品配方.
+    *
+    * @throws Exception 异常
+    */
+    @Test
+    public void testExport() throws Exception {
+        ProductFormulaExportVO productFormulaExportVO = new ProductFormulaExportVO();
+        productFormulaExportVO.setProductQueryName();
+        productFormulaExportVO.setCategoryIdList();
+        productFormulaExportVO.setCategoryNameList();
+        productFormulaExportVO.setSortOrder();
+        productFormulaExportVO.setGridHeaderList();
+        productFormulaExportVO.setStaffId();
+        productFormulaExportVO.setLocationId();
+
+        String url = BASE_URL + "/product_formulas/export.json";
+        mockMvc.perform(MockMvcRequestBuilders.post(url)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header(HeaderConstants.X_MARS_MERCHANT_ID, ConstantsTest.HUAJY_MERCHANT_ID_1)
+                    .header(HeaderConstants.X_MARS_ACCESS_TOKEN, ConstantsTest.X_MARS_ACCESS_TOKEN)
+                    .header(HeaderConstants.X_MARS_MERCHANT_OPERATOR, ConstantsTest.OPERATOR_HUAJY)
+                    .content(gson.toJson(productFormulaExportVO))
+            )
+            .andExpect(MockMvcResultMatchers.status().isCreated())
+            .andReturn().getResponse();
     }
 
 
@@ -268,7 +388,7 @@ public class ProductFormulaControllerTest extends BaseTest {
     * @param finishedProductVariantId finishedProductVariantId
     * @return 返回对象
     */
-    private ProductFormulaVO read(final BigInteger merchantId,final BigInteger finishedProductVariantId) throws Exception {
+    private ProductFormulaVO read(final BigInteger merchantId, final BigInteger finishedProductVariantId) throws Exception {
         String url = BASE_URL + "/product_formulas/read_by_finished_product_variant_id/" + finished_product_variant_id + ".json";
         MockHttpServletResponse mockResponse = mockMvc.perform(MockMvcRequestBuilders.get(url)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -346,6 +466,6 @@ public class ProductFormulaControllerTest extends BaseTest {
         .andReturn().getResponse();
         mockResponse.setCharacterEncoding("UTF-8");
 
-        return mockResponse
+        return mockResponse;
     }
 }

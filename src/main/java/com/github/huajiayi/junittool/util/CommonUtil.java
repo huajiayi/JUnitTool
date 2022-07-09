@@ -9,8 +9,10 @@ import org.apache.commons.lang.StringUtils;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -34,8 +36,15 @@ public class CommonUtil {
             String packagePath = classPathMap.get(name);
             File file = new File(packagePath);
             Arrays.stream(file.listFiles()).forEach(f -> {
-                String className = f.getName();
-                String clazzName = className.substring(0, className.length() - 5);
+                if (f.isDirectory()) {
+                    return;
+                }
+
+                String fileName = f.getName();
+                if(!"java".equals(getFileSuffix(fileName))) {
+                    return;
+                }
+                String clazzName = fileName.substring(0, fileName.length() - 5);
                 depPackageMap.put(clazzName, name + "." + clazzName);
             });
         });
@@ -95,8 +104,11 @@ public class CommonUtil {
     }
 
     public static String formatTextUrl(String url) {
-        return url.replaceAll("[{]", "\" + ")
-                .replaceAll("[}]", " + \"");
+        return Pattern.compile("\\{\\w+\\}").matcher(url).replaceAll((matchResult) -> {
+            String group = matchResult.group();
+            String param = group.substring(1, group.length() - 1);
+            return "\" + " + snakeToSmallCamel(param) + " + \"";
+        });
     }
 
     public static String camelToSnake(String camelStr) {
@@ -104,15 +116,34 @@ public class CommonUtil {
         return ret.toLowerCase();
     }
 
-    public static String toSmallCamel(String str) {
-        char[] chars = str.toCharArray();
-        chars[0] = Character.toLowerCase(chars[0]);
-        return String.valueOf(chars);
+    public static String snakeToBigCamel(String snakeStr) {
+        return snakeToCamel(snakeStr, false);
+    }
+
+    public static String snakeToSmallCamel(String snakeStr) {
+        return snakeToCamel(snakeStr, true);
+    }
+
+    public static String snakeToCamel(String snakeStr, boolean smallCamel) {
+        String[] parts = snakeStr.split("_");
+        if (smallCamel) {
+            parts[0] = StringUtils.uncapitalize(parts[0]);
+        }
+        String joinStr = Arrays.stream(parts).skip(1).map(o -> StringUtils.capitalize(o)).collect(Collectors.joining());
+        return parts[0].concat(joinStr);
     }
 
     public static String toBigCamel(String str) {
         char[] chars = str.toCharArray();
         chars[0] = Character.toUpperCase(chars[0]);
         return String.valueOf(chars);
+    }
+
+    public static String getFileSuffix(String fileName) {
+        String[] parts = fileName.split(".");
+        if (parts.length != 2) {
+            return null;
+        }
+        return parts[1];
     }
 }
